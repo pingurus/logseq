@@ -1079,6 +1079,7 @@
                         (try
                           (clock/clock-interval clock-start clock-end)
                           (catch :default e
+                            (js/console.dir e)
                             (notification/show! "The end time is eariler than start time!" :warning)
                             nil)))
         new-clock-log (and clock-end clock-span

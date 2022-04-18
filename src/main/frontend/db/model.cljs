@@ -96,6 +96,16 @@
          [?page :block/name ?page-name]]
        (conn/get-db repo)))
 
+(defn get-all-colored-pages
+  [repo]
+  (d/q '[:find ?n ?t 
+       :where
+       [?b :block/properties ?p]
+       [?b :block/name ?n]
+       [(get ?p :node-color) ?t]
+       ]
+       (conn/get-conn repo)))
+
 (defn get-all-namespace-relation
   [repo]
   (d/q '[:find ?page-name ?parent

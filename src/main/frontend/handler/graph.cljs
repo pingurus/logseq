@@ -15,7 +15,8 @@
        links))
 
 (defn- build-nodes
-  [dark? current-page page-links tags nodes namespaces]
+  ([dark? current-page page-links tags nodes namespaces] (build-nodes dark? current-page page-links tags nodes namespaces {}))
+  ([dark? current-page page-links tags nodes namespaces colors]
   (let [parents (set (map last namespaces))
         current-page (or current-page "")
         pages (set (flatten nodes))]
@@ -33,15 +34,16 @@
                    color (if (contains? tags p)
                            (if dark? "orange" "green")
                            color)
+                   color (if (contains? colors p) (string/replace (get colors p) #"\"" "") color)
                    n (get page-links p 1)
                    size (int (* 8 (max 1.0 (js/Math.cbrt n))))]
-                (cond->
-                  {:id p
-                   :label p
-                   :size size
-                   :color color}
-                  (contains? parents p)
-                  (assoc :parent true))))))))
+               (cond->
+                {:id p
+                 :label p
+                 :size size
+                 :color color}
+                 (contains? parents p)
+                 (assoc :parent true)))))))))
 
                   ;; slow
 (defn- uuid-or-asset?
@@ -88,8 +90,10 @@
     (when-let [repo (state/get-current-repo)]
       (let [relation (db/get-pages-relation repo journal?)
             tagged-pages (db/get-all-tagged-pages repo)
+            colored-pages (db/get-all-colored-pages repo)
             namespaces (db/get-all-namespace-relation repo)
             tags (set (map second tagged-pages))
+            colors (into {} colored-pages)
             full-pages (db/get-all-pages repo)
             all-pages (map db/get-original-name full-pages)
             page-name->original-name (zipmap (map :block/name full-pages) all-pages)
@@ -114,7 +118,7 @@
             page-links (reduce (fn [m [k v]] (-> (update m k inc)
                                                  (update v inc))) {} links)
             links (build-links (remove (fn [[_ to]] (nil? to)) links))
-            nodes (build-nodes dark? (string/lower-case current-page) page-links tags nodes namespaces)]
+            nodes (build-nodes dark? (string/lower-case current-page) page-links tags nodes namespaces colors)]
         (normalize-page-name
          {:nodes nodes
           :links links
@@ -130,6 +134,8 @@
             tags (remove #(= page %) tags)
             ref-pages (db/get-page-referenced-pages repo page)
             mentioned-pages (db/get-pages-that-mentioned-page repo page show-journal)
+            colored-pages (db/get-all-colored-pages repo)
+            colors (into {} colored-pages)
             namespaces (db/get-all-namespace-relation repo)
             links (concat
                    namespaces
@@ -167,7 +173,7 @@
                         tags)
                        (remove nil?)
                        (distinct))
-            nodes (build-nodes dark? page links (set tags) nodes namespaces)
+            nodes (build-nodes dark? page links (set tags) nodes namespaces colors)
             full-pages (db/get-all-pages repo)
             all-pages (map db/get-original-name full-pages)
             page-name->original-name (zipmap (map :block/name full-pages) all-pages)]

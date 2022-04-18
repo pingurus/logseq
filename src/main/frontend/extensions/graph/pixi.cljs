@@ -74,7 +74,7 @@
         (.force "x" (-> (forceX 0) (.strength 0.02)))
         (.force "y" (-> (forceY 0) (.strength 0.02)))
         (.force "center" (forceCenter))
-        (.velocityDecay 0.8))
+        (.velocityDecay 0.4))
     (reset! *simulation simulation)
     simulation))
 

@@ -1,0 +1,29 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Install deps",
+            "type": "shell",
+            "command": "yarn install && cd static && yarn install && cd ..",
+            "problemMatcher": []
+        },{
+            "label": "Build Release",
+            "type": "shell",
+            "command": "yarn release-electron",
+            "problemMatcher": []
+        },{
+            "label": "Run dev",
+            "type": "shell",
+            "command": "yarn dev-electron-app",
+            "problemMatcher": []
+        },
+        {
+            "label": "yarn watch",
+            "type": "shell",
+            "command": "yarn watch",
+            "problemMatcher": []
+        }
+    ]
+}

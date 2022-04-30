@@ -120,6 +120,34 @@
   (->> (get-all-namespace-relation repo)
        (map second)))
 
+(defn get-page-parent
+  [repo page-name]
+  (when-let [conn (and repo (conn/get-conn repo))]
+    (some->> (d/q '[:find ?parent
+                    :in $ ?page-name
+                    :where
+                    [?page :block/name ?page-name]
+                    [?page :block/namespace ?e]
+                    [?e :block/name ?parent]]
+                  conn
+                  (util/page-name-sanity-lc page-name))
+             db-utils/seq-flatten
+             distinct)))
+
+(defn get-page-children
+  [repo page-name]
+  (when-let [conn (and repo (conn/get-conn repo))]
+    (some->> (d/q '[:find ?child
+                    :in $ ?page-name
+                    :where
+                    [?page :block/name ?child]
+                    [?page :block/namespace ?e]
+                    [?e :block/name ?page-name]]
+                  conn
+                  (util/page-name-sanity-lc page-name))
+             db-utils/seq-flatten
+             distinct)))
+
 (defn get-pages
   [repo]
   (->> (d/q

@@ -52,7 +52,7 @@
   journal-page? page-alias-set pull-block
   set-file-last-modified-at! page-empty? page-exists? page-empty-or-dummy? get-alias-source-page
   set-file-content! has-children? get-namespace-pages get-all-namespace-relation get-pages-by-name-partition
-  get-original-name]
+  get-original-name get-page-parent get-page-children]
 
  [frontend.db.react
   get-current-page set-key-value

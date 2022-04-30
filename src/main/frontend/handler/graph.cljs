@@ -17,6 +17,7 @@
 (defn- build-nodes
   ([dark? current-page page-links tags nodes namespaces] (build-nodes dark? current-page page-links tags nodes namespaces {}))
   ([dark? current-page page-links tags nodes namespaces colors]
+  (when-let [repo (state/get-current-repo)]
   (let [parents (set (map last namespaces))
         current-page (or current-page "")
         pages (set (flatten nodes))]
@@ -36,14 +37,16 @@
                            color)
                    color (if (contains? colors p) (string/replace (get colors p) #"\"" "") color)
                    n (get page-links p 1)
-                   size (int (* 8 (max 1.0 (js/Math.cbrt n))))]
+                   size (int (* 8 (max 1.0 (js/Math.cbrt n))))
+                   refs (set/union (set (flatten (db/get-page-referenced-pages repo p))) (set (flatten (db/get-pages-that-mentioned-page repo p))) (set (db/get-page-parent repo p)) (set (db/get-page-children repo p)))]
                (cond->
                 {:id p
                  :label p
                  :size size
-                 :color color}
+                 :color color
+                 :refs refs}
                  (contains? parents p)
-                 (assoc :parent true)))))))))
+                 (assoc :parent true))))))))))
 
                   ;; slow
 (defn- uuid-or-asset?

@@ -1,5 +1,6 @@
 (ns frontend.extensions.graph.pixi
   (:require [cljs-bean.core :as bean]
+            [clojure.set :as set]
             ["d3-force"
              :refer [forceCenter forceCollide forceLink forceManyBody forceSimulation forceX forceY]
              :as    force]
@@ -61,7 +62,18 @@
                 (-> (forceLink)
                     (.id (fn [d] (.-id d)))
                     (.distance 180)
-                    (.links links)))
+                    (.links links)
+                    (.strength (fn [ln] 
+                      (let [src_refs (set ln.source.refs)
+                            target_refs (set ln.target.refs)
+                            union (set/union src_refs target_refs)
+                            intersection (set/intersection src_refs target_refs)
+                            value (* 2 
+                        (/ (+ 1 (count intersection))
+                           (- (count union) 1))
+                      ) ]
+                      (do (println value) value)
+                      )))))
         (.force "charge"
                 (-> (forceManyBody)
                     (.distanceMax (if (> nodes-count 500) 4000 600))
@@ -71,10 +83,11 @@
                 (-> (forceCollide)
                     (.radius (+ 8 18))
                     (.iterations 2)))
-        (.force "x" (-> (forceX 0) (.strength 0.02)))
+        (.force "x" (-> (forceX 0) (.strength 0.01)))
         (.force "y" (-> (forceY 0) (.strength 0.02)))
         (.force "center" (forceCenter))
-        (.velocityDecay 0.4))
+        (.velocityDecay 0.2)
+        (.alphaDecay 0.01))
     (reset! *simulation simulation)
     simulation))
 

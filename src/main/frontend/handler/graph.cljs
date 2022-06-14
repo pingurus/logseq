@@ -27,6 +27,7 @@
      (mapv (fn [p]
              (let [p (str p)
                    current-page? (= p current-page)
+                   parent (db/get-page-parent repo p)
                    color (case [dark? current-page?] ; FIXME: Put it into CSS
                            [false false] "#999"
                            [false true]  "#045591"
@@ -35,10 +36,11 @@
                    color (if (contains? tags p)
                            (if dark? "orange" "green")
                            color)
+                   color (if (contains? colors (first parent)) (string/replace (get colors (first parent)) #"\"" "") color)
                    color (if (contains? colors p) (string/replace (get colors p) #"\"" "") color)
                    n (get page-links p 1)
                    size (int (* 8 (max 1.0 (js/Math.cbrt n))))
-                   refs (set/union (set (flatten (db/get-page-referenced-pages repo p))) (set (flatten (db/get-pages-that-mentioned-page repo p))) (set (db/get-page-parent repo p)) (set (db/get-page-children repo p)))]
+                   refs (set/union (set (flatten (db/get-page-referenced-pages repo p))) (set (flatten (db/get-pages-that-mentioned-page repo p))) (set parent) (set (db/get-page-children repo p)))]
                (cond->
                 {:id p
                  :label p

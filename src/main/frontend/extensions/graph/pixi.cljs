@@ -13,31 +13,13 @@
 
 (def Graph (gobj/get graphology "Graph"))
 
-(defonce colors
-  ["#1f77b4"
-   "#ff7f0e"
-   "#2ca02c"
-   "#d62728"
-   "#9467bd"
-   "#8c564b"
-   "#e377c2"
-   "#7f7f7f"
-   "#bcbd22"
-   "#17becf"])
-
 (defn default-style
   [dark?]
   {:node {:size   (fn [node]
                     (or (.-size node) 8))
           :border {:width 0}
           :color  (fn [node]
-                    (if-let [parent (gobj/get node "parent")]
-                      (when-let [parent (if (= parent "ls-selected-nodes")
-                                          parent
-                                          (.-id node))]
-                        (let [v (js/Math.abs (hash parent))]
-                          (nth colors (mod v (count colors)))))
-                      (.-color node)))
+                    (.-color node))
           :label  {:content  (fn [node] (.-id node))
                    :type     (.-TEXT (.-TextType Pixi-Graph))
                    :fontSize 12
@@ -68,26 +50,33 @@
                             target_refs (set ln.target.refs)
                             union (set/union src_refs target_refs)
                             intersection (set/intersection src_refs target_refs)
-                            value (* 2 
-                        (/ (+ 1 (count intersection))
-                           (- (count union) 1))
-                      ) ]
+                            src_refs_count (count src_refs)
+                            target_refs_count (count target_refs)
+                            union_count (- (count union) 1)
+                            intersection_count (+ (count intersection) 1)
+                            value (* 
+                                    (+ (/ intersection_count src_refs_count) 
+                                       (/ intersection_count target_refs_count))
+                                    (/ intersection_count union_count)
+                                  )
+                             ]
                       (do (println value) value)
                       )))))
         (.force "charge"
                 (-> (forceManyBody)
-                    (.distanceMax (if (> nodes-count 500) 4000 600))
+                    (.distanceMin 8)
+                    (.distanceMax 600)
                     (.theta 0.5)
-                    (.strength -600)))
+                    (.strength -1200)))
         (.force "collision"
                 (-> (forceCollide)
                     (.radius (+ 8 18))
                     (.iterations 2)))
-        (.force "x" (-> (forceX 0) (.strength 0.01)))
-        (.force "y" (-> (forceY 0) (.strength 0.02)))
+        (.force "x" (-> (forceX 0) (.strength (/ 1 nodes-count))))
+        (.force "y" (-> (forceY 0) (.strength (/ 1 nodes-count))))
         (.force "center" (forceCenter))
-        (.velocityDecay 0.2)
-        (.alphaDecay 0.01))
+        (.velocityDecay 0.8)
+        (.alphaDecay 0.001))
     (reset! *simulation simulation)
     simulation))
 

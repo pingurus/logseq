@@ -104,7 +104,7 @@
        [?b :block/name ?n]
        [(get ?p :node-color) ?t]
        ]
-       (conn/get-conn repo)))
+       (conn/get-db repo)))
 
 (defn get-all-namespace-relation
   [repo]
@@ -122,7 +122,7 @@
 
 (defn get-page-parent
   [repo page-name]
-  (when-let [conn (and repo (conn/get-conn repo))]
+  (when-let [conn (and repo (conn/get-db repo))]
     (some->> (d/q '[:find ?parent
                     :in $ ?page-name
                     :where
@@ -136,7 +136,7 @@
 
 (defn get-page-children
   [repo page-name]
-  (when-let [conn (and repo (conn/get-conn repo))]
+  (when-let [conn (and repo (conn/get-db repo))]
     (some->> (d/q '[:find ?child
                     :in $ ?page-name
                     :where

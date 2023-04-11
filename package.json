@@ -115,6 +115,7 @@
         "highlight.js": "10.4.1",
         "ignore": "5.1.8",
         "jszip": "3.8.0",
+        "make": "^0.8.1",
         "mldoc": "^1.5.1",
         "path": "0.12.7",
         "path-complete-extname": "1.0.0",

@@ -14,3 +14,5 @@ RUN curl -sL https://download.clojure.org/install/linux-install-1.10.1.727.sh | 
 RUN apt-get install --no-install-recommends zip
 
 RUN apt-get install --no-install-recommends -y libgtk-3-dev libxshmfence-dev libnss3 libdrm-dev libasound2-dev
+
+RUN apt-get install build-essential
